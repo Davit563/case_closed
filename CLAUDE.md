@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-`case_closed` is a freshly scaffolded Python package with no features yet. The only code is `__version__` in `src/case_closed/__init__.py` and a smoke test.
+`case_closed` is a learning project: a mystery case (`cases/blackwood_manor/`) plus a hand-written Claude tool-use loop (`src/case_closed/agent.py`) that reads the evidence files and names the culprit. `solution.json` holds the answer and is hidden from the agent's tools.
 
 ## Rules
 
@@ -19,7 +19,11 @@ pip install -e ".[dev]"        # editable install + pytest
 
 pytest                         # run all tests
 pytest tests/test_smoke.py::test_version   # run a single test
+
+python -m case_closed.agent "Who stole the painting?"   # live run; needs Anthropic credentials, costs money
 ```
+
+Tests never call the API: `tests/test_agent.py` passes a fake client into `solve()`.
 
 There is no linter or formatter configured.
 
