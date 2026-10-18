@@ -1,0 +1,9 @@
+{
+  "culprit": "Victor Crane",
+  "contradiction": {
+    "suspect": "Victor Crane",
+    "claim": "On the Terrace from about 20:30 to 20:50; never went near the Gallery after dinner.",
+    "log_entries": ["20:36,Gallery,Victor Crane", "20:44,Terrace,Victor Crane"]
+  },
+  "explanation": "Victor entered the Gallery at 20:36, cut the canvas from its stretcher (clue 2), hid it in the Terrace planter at 20:44 (clue 3), and returned to the Dining Room at 20:52. Motive: Eleanor refused to sell him the painting. Sophie's sketchbook (clue 1) is a red herring; the log keeps her in the Study."
+}
