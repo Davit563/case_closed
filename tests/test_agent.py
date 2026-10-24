@@ -113,4 +113,20 @@ def test_main_requires_solve_command():
 
     result = subprocess.run([sys.executable, "-m", "case_closed"], capture_output=True, text=True)
     assert result.returncode != 0
-    assert "usage: python -m case_closed solve" in result.stderr
+    assert "usage: python -m case_closed" in result.stderr
+    assert "{solve,eval}" in result.stderr
+
+
+def test_default_provider_follows_the_key_that_is_set(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert agent.default_provider() == "anthropic"
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    assert agent.default_provider() == "openai"
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
+    assert agent.default_provider() == "anthropic"
+
+
+def test_get_investigator_rejects_unknown_provider():
+    with pytest.raises(ValueError):
+        agent.get_investigator("gemini")

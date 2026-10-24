@@ -20,10 +20,13 @@ pip install -e ".[dev]"        # editable install + pytest
 pytest                         # run all tests
 pytest tests/test_smoke.py::test_version   # run a single test
 
-python -m case_closed.agent "Who stole the painting?"   # live run; needs Anthropic credentials, costs money
+python -m case_closed solve "Who stole the painting?"   # live run on blackwood_manor; needs an API key, costs money
+python -m case_closed eval     # live run on every cases/*/ with a solution.json; prints "N/M solved, avg X tool calls"
 ```
 
-Tests never call the API: `tests/test_agent.py` passes a fake client into `solve()`.
+Both commands take `--provider anthropic|openai` (before the command, e.g. `python -m case_closed --provider openai eval`). By default they use whichever key is set, `ANTHROPIC_API_KEY` first, then `OPENAI_API_KEY`. The Claude loop is in `agent.py` and the OpenAI loop is in `openai_agent.py`. They share the tools, system prompt and step limit. `OPENAI_MODEL` overrides the OpenAI model.
+
+Tests never call the API: `tests/test_agent.py`, `tests/test_openai_agent.py` and `tests/test_eval.py` pass fake clients in. `eval` judges an answer by its last `Culprit: Full Name` line.
 
 There is no linter or formatter configured.
 

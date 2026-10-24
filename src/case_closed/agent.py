@@ -1,12 +1,14 @@
 """A hand-written tool-use loop: Claude investigates the case by reading evidence files."""
 
+import os
 import sys
 from pathlib import Path
 
 import anthropic
 
 MODEL = "claude-sonnet-5-5"
-CASE_DIR = Path(__file__).resolve().parents[2] / "cases" / "blackwood_manor"
+CASES_DIR = Path(__file__).resolve().parents[2] / "cases"
+CASE_DIR = CASES_DIR / "blackwood_manor"  # the default case
 HIDDEN = {"solution.json"}  # the detective must not read the answer
 MAX_STEPS = 15  # stop a runaway investigation
 
@@ -14,6 +16,14 @@ SYSTEM = (
     "You are a meticulous detective. Gather evidence before accusing anyone. "
     "Cite the files that prove your answer."
 )
+
+class InvestigationError(RuntimeError):
+    """The detective gave up without an answer. Remembers how many tools it had called."""
+
+    def __init__(self, message, tool_calls):
+        super().__init__(message)
+        self.tool_calls = tool_calls
+
 
 TOOLS = [
     {
@@ -42,44 +52,69 @@ TOOLS = [
 ]
 
 
-def list_evidence():
-    names = [p.relative_to(CASE_DIR).as_posix() for p in CASE_DIR.rglob("*") if p.is_file()]
+def list_evidence(case_dir=CASE_DIR):
+    names = [p.relative_to(case_dir).as_posix() for p in case_dir.rglob("*") if p.is_file()]
     return "\n".join(sorted(n for n in names if n not in HIDDEN))
 
 
-def read_evidence(name):
-    file = (CASE_DIR / name).resolve()
-    if CASE_DIR not in file.parents or file.name in HIDDEN or not file.is_file():
+def read_evidence(name, case_dir=CASE_DIR):
+    case_dir = case_dir.resolve()
+    file = (case_dir / name).resolve()
+    if case_dir not in file.parents or file.name in HIDDEN or not file.is_file():
         raise ValueError(f"No evidence file named {name!r}. Call list_evidence to see the files.")
     return file.read_text()
 
 
-def search_evidence(keyword):
+def search_evidence(keyword, case_dir=CASE_DIR):
     matches = []
-    for name in list_evidence().splitlines():
-        for number, line in enumerate(read_evidence(name).splitlines(), start=1):
+    for name in list_evidence(case_dir).splitlines():
+        for number, line in enumerate(read_evidence(name, case_dir).splitlines(), start=1):
             if keyword.lower() in line.lower():
                 matches.append(f"{name}:{number}: {line.strip()}")
     return "\n".join(matches) or f"No lines contain {keyword!r}."
 
 
-def run_tool(tool_name, tool_input):
+def run_tool(tool_name, tool_input, case_dir=CASE_DIR):
     """Run one tool call. Returns (content, is_error)."""
     try:
         if tool_name == "list_evidence":
-            return list_evidence(), False
+            return list_evidence(case_dir), False
         if tool_name == "read_evidence":
-            return read_evidence(tool_input["name"]), False
+            return read_evidence(tool_input["name"], case_dir), False
         if tool_name == "search_evidence":
-            return search_evidence(tool_input["keyword"]), False
+            return search_evidence(tool_input["keyword"], case_dir), False
         return f"Unknown tool {tool_name!r}.", True
     except (KeyError, ValueError) as e:
         return str(e), True
 
 
-def solve(question, client=None):
+def default_provider():
+    """Use whichever API key is set: Anthropic first, then OpenAI."""
+    if not os.environ.get("ANTHROPIC_API_KEY") and os.environ.get("OPENAI_API_KEY"):
+        return "openai"
+    return "anthropic"
+
+
+def get_investigator(provider):
+    """The investigate() function for "anthropic" (this file) or "openai" (openai_agent.py)."""
+    if provider == "anthropic":
+        return investigate
+    if provider == "openai":
+        from case_closed import openai_agent  # imported here so agent.py doesn't depend on it
+        return openai_agent.investigate
+    raise ValueError(f"Unknown provider {provider!r}. Use 'anthropic' or 'openai'.")
+
+
+def solve(question, client=None, case_dir=CASE_DIR, provider="anthropic"):
+    answer, _ = get_investigator(provider)(question, client, case_dir)
+    return answer
+
+
+def investigate(question, client=None, case_dir=CASE_DIR):
+    """Run the tool-use loop on one case. Returns (answer, number of tool calls)."""
     client = client or anthropic.Anthropic()
     messages = [{"role": "user", "content": question}]
+    tool_calls = 0
 
     for step in range(1, MAX_STEPS + 1):
         response = client.beta.messages.create(
@@ -102,7 +137,8 @@ def solve(question, client=None):
         for block in response.content:
             if block.type == "tool_use":
                 print(f"[step {step}] {block.name}({block.input})")
-                content, is_error = run_tool(block.name, block.input)
+                tool_calls += 1
+                content, is_error = run_tool(block.name, block.input, case_dir)
                 if is_error:
                     print(f"    error: {content}")
                 results.append({
@@ -113,13 +149,13 @@ def solve(question, client=None):
                 })
         messages.append({"role": "user", "content": results})
     else:
-        raise RuntimeError(f"Claude was still calling tools after {MAX_STEPS} steps.")
+        raise InvestigationError(f"Claude was still calling tools after {MAX_STEPS} steps.", tool_calls)
 
     if response.stop_reason == "refusal":
-        raise RuntimeError("Claude declined the request.")
+        raise InvestigationError("Claude declined the request.", tool_calls)
     if response.stop_reason == "max_tokens":
-        raise RuntimeError("The answer was cut off by max_tokens.")
-    return "".join(b.text for b in response.content if b.type == "text")
+        raise InvestigationError("The answer was cut off by max_tokens.", tool_calls)
+    return "".join(b.text for b in response.content if b.type == "text"), tool_calls
 
 
 if __name__ == "__main__":
