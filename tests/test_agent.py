@@ -130,3 +130,19 @@ def test_default_provider_follows_the_key_that_is_set(monkeypatch):
 def test_get_investigator_rejects_unknown_provider():
     with pytest.raises(ValueError):
         agent.get_investigator("gemini")
+
+
+def test_load_env_file_sets_missing_keys_only(tmp_path, monkeypatch):
+    env = tmp_path / ".env"
+    env.write_text("# comment\nOPENAI_API_KEY='abc'\n\nANTHROPIC_API_KEY=from-file\nnot a setting\n")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "already-set")
+
+    agent.load_env_file(env)
+
+    assert agent.os.environ["OPENAI_API_KEY"] == "abc"
+    assert agent.os.environ["ANTHROPIC_API_KEY"] == "already-set"
+
+
+def test_load_env_file_ignores_missing_file(tmp_path):
+    agent.load_env_file(tmp_path / "nope.env")  # no error

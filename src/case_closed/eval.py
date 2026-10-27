@@ -37,6 +37,7 @@ def run(client=None, provider="anthropic"):
         print(f"\n=== {case_dir.name} ===")
         try:
             answer, calls = investigate(QUESTION, client, case_dir)
+            print(f"\n{answer.strip()}\n")
             name = accused(answer)
         except agent.InvestigationError as e:
             print(f"failed: {e}")

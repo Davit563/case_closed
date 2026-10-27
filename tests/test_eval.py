@@ -45,6 +45,7 @@ def test_run_scores_cases_and_averages_tool_calls(tmp_path, monkeypatch, capsys)
 
     assert evaluate.run(client) == (1, 3)
     out = capsys.readouterr().out
+    assert "Culprit: Ann Lee\n" in out  # the full answer is printed
     assert "SOLVED: accused Ann Lee" in out
     assert "WRONG: accused Someone Else, culprit was Bob Ray" in out
     assert "WRONG: accused nobody, culprit was Cy Doe" in out

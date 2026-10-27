@@ -1,0 +1,12 @@
+{
+  "culprit": "Max Turner",
+  "contradiction": {
+    "suspect": "Max Turner",
+    "claim": "Worked in the Prop Store from about 20:30 until about 21:30 and never set foot in the Manager's Office.",
+    "log_entries": [
+      "21:07,Manager's Office,Max Turner",
+      "21:12,Stage Door,Max Turner"
+    ]
+  },
+  "explanation": "Max read the safe code off the props schedule in the Prop Store (clue 2), entered the Manager's Office at 21:07 while Simon was on his tea break, and hid the cash behind the Stage Door at 21:12 (clue 3), returning to the Prop Store at 21:15. He owed money to a bookie. Nora's back pay letter (clue 1) is a red herring: the log keeps her in the Green Room and then the Dressing Room."
+}

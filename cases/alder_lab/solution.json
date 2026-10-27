@@ -1,0 +1,12 @@
+{
+  "culprit": "Tom Becker",
+  "contradiction": {
+    "suspect": "Tom Becker",
+    "claim": "Went straight from the Break Room to the Server Room at about 18:50 and never went near the Clean Room.",
+    "log_entries": [
+      "18:52,Clean Room,Tom Becker",
+      "19:02,Loading Dock,Tom Becker"
+    ]
+  },
+  "explanation": "Tom entered the Clean Room at 18:52, opened the carrier with the torque driver he is trained on (clue 2), hid the chip under a Loading Dock shelf at 19:02 (clue 3), and only reached the Server Room at 19:08. He hoped to sell it to Corvex. Hannah's Corvex job application (clue 1) is a red herring: the log never puts her in the Clean Room."
+}

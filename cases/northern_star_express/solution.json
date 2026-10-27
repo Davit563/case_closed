@@ -1,0 +1,12 @@
+{
+  "culprit": "Celia Marsh",
+  "contradiction": {
+    "suspect": "Celia Marsh",
+    "claim": "Stayed in Compartment B from about 22:05 until about 23:30 and never left it.",
+    "log_entries": [
+      "22:47,Compartment A,Celia Marsh",
+      "22:55,Baggage Car,Celia Marsh"
+    ]
+  },
+  "explanation": "Celia left her compartment, entered Compartment A at 22:47, opened the jewelry case with the spare key only she carries (clue 2), and hid the brooch in a hatbox in the Baggage Car at 22:55 (clue 3) before returning to Compartment B at 23:00. She had just learned she would be dismissed. Raymond's loupe (clue 1) is a red herring: the log keeps him in the Lounge Car and then Compartment C."
+}

@@ -88,6 +88,21 @@ def run_tool(tool_name, tool_input, case_dir=CASE_DIR):
         return str(e), True
 
 
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"  # local secrets; ignored by git
+
+
+def load_env_file(path=ENV_FILE):
+    """Copy KEY=value lines from a .env file into os.environ. Keys already set are left alone."""
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+
+
 def default_provider():
     """Use whichever API key is set: Anthropic first, then OpenAI."""
     if not os.environ.get("ANTHROPIC_API_KEY") and os.environ.get("OPENAI_API_KEY"):

@@ -1,7 +1,9 @@
 import argparse
 
 from case_closed import eval as evaluate
-from case_closed.agent import default_provider, solve
+from case_closed.agent import default_provider, load_env_file, solve
+
+load_env_file()  # pick up API keys from .env before choosing a provider
 
 parser = argparse.ArgumentParser(prog="python -m case_closed")
 parser.add_argument("--provider", choices=["anthropic", "openai"], default=default_provider(),

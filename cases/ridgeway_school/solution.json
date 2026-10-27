@@ -1,0 +1,12 @@
+{
+  "culprit": "Julia Hart",
+  "contradiction": {
+    "suspect": "Julia Hart",
+    "claim": "Marked essays in the Staff Room from about 15:15 until 17:00 and never left it.",
+    "log_entries": [
+      "16:12,Exams Office,Julia Hart",
+      "16:19,Staff Room,Julia Hart"
+    ]
+  },
+  "explanation": "Julia slipped out of the Staff Room, entered the Exams Office at 16:12, unlocked the cabinet with her own key (clue 2), and hid the papers in the Staff Room recycling box (clue 3) when she returned at 16:19. Her son sits the exam on Monday. Ethan's photocopied paper (clue 1) is a red herring: it is last year's paper from the Library, and the log keeps him in the Library all afternoon."
+}
